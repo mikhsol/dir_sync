@@ -1,4 +1,4 @@
-from unittest import TestCase, skip
+from unittest import TestCase
 import os
 
 from inotify_simple import flags
