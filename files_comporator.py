@@ -19,11 +19,10 @@ class FilesComporator:
             t = f2.read()
 
         matcher = difflib.SequenceMatcher(None, o, t)
-        for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        for tag, i1, i2, j1, j2 in reversed(matcher.get_opcodes()):
             result.append({
                 'tag': tag,
                 'i1': i1, 'i2': i2,
-                'j1': j1, 'j2': j2,
                 'payload': t[j1: j2]
                 })
 
@@ -31,23 +30,23 @@ class FilesComporator:
 
     @staticmethod
     def patch(file, diff):
+        '''Patch file with provided diff rules given by difflib.SequenceMatcher
+           opcodes (rules how to turn one object into another)
+        '''
         if len(diff) == 0:
             return
         data = []
         with open(file, 'rb') as f:
             data = bytearray(f.read())
 
-        for d in diff[::-1]:
+        for d in diff:
             tag, payload = d['tag'], d['payload']
-            i1, i2, j1, j2 = d['i1'], d['i2'], d['j1'], d['j2']
+            i1, i2 = d['i1'], d['i2']
 
-            if tag == 'insert':
+            if tag in ['insert', 'replace']:
                 data[i1:i2] = payload
-            # Approx. behaviour for replace/delete
-            # elif tag == 'replace':
-            #     data[i1:i2] = payload[j1:j2]
-            # elif tag == 'delete':
-            #     del data[i1:i2]
+            elif tag == 'delete':
+                del data[i1:i2]
             elif tag == 'equal':
                 continue
 

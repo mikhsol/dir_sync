@@ -36,6 +36,26 @@ class FilesComporatorTest(TestCase):
         self.assertFalse(fc.is_equal(self.file1, self.file2))
         self.assertEqual(len(diff), 3)
 
-        print(diff)
         fc.patch(self.file1, diff)
         self.assertTrue(fc.is_equal(self.file1, self.file2))
+
+    def test_replace_and_delete_in_files_for_patch(self):
+        os.system('echo hello >' + self.file1)
+        os.system('echo awful >>' + self.file1)
+        os.system('echo world >>' + self.file1)
+        os.system('echo haaaa!! >> ' + self.file1)
+
+        os.system('echo hello > ' + self.file2)
+        os.system('echo great >> ' + self.file2)
+        os.system('echo my >> ' + self.file2)
+        os.system('echo world >> ' + self.file2)
+
+
+        diff = fc.diff(self.file1, self.file2)
+        print(diff)
+        self.assertFalse(fc.is_equal(self.file1, self.file2))
+        self.assertEqual(len(diff), 6)
+
+        fc.patch(self.file1, diff)
+        self.assertTrue(fc.is_equal(self.file1, self.file2))
+
