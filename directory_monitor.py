@@ -1,6 +1,7 @@
 import os
 from inotify_simple import INotify, flags
 
+
 class Directory:
 
     def __init__(self, name, path=None):
@@ -55,7 +56,6 @@ class DirectoryMonitor:
         self.inotify.rm_watch(event.wd)
         return self.watched_dirs.pop(event.wd)
 
-
     def close(self):
         self.inotify.close()
 
@@ -66,12 +66,14 @@ class DirectoryMonitor:
         return os.path.join(self.watched_dirs.get(event.wd).path,
                             event.name)
         print(event.directory.path)
+
     def _prepare_events(self, events):
         results = []
         for event in events:
             event = EventInfo(event)
             flags_ = self.get_flags(event)
-            event.directory = Directory(event.name, self._get_path_from_event(event))
+            event.directory = Directory(event.name,
+                                        self._get_path_from_event(event))
             if flags.CREATE in flags_ and flags.ISDIR in flags_:
                     self.watch(event.directory)
             elif flags.DELETE in flags_ and flags.ISDIR in flags_:

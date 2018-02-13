@@ -1,6 +1,7 @@
 import filecmp
 import difflib
 
+
 class FilesComporator:
     @staticmethod
     def is_equal(one, two):

@@ -23,7 +23,7 @@ class FilesComporatorTest(TestCase):
         self.assertTrue(fc.is_equal(self.file1, self.file2))
         self.assertEqual(len(fc.diff(self.file1, self.file2)), 0)
 
-    def test_compare_simple_empty_and_non_empty_file_and_get_diff_and_patch_first_file(self):
+    def test_compare_empty_and_non_empty_file_get_diff_patch_first_file(self):
         os.system('echo >' + self.file1)
         os.system('echo hello > ' + self.file2)
 
@@ -50,7 +50,6 @@ class FilesComporatorTest(TestCase):
         os.system('echo my >> ' + self.file2)
         os.system('echo world >> ' + self.file2)
 
-
         diff = fc.diff(self.file1, self.file2)
         print(diff)
         self.assertFalse(fc.is_equal(self.file1, self.file2))
@@ -58,4 +57,3 @@ class FilesComporatorTest(TestCase):
 
         fc.patch(self.file1, diff)
         self.assertTrue(fc.is_equal(self.file1, self.file2))
-

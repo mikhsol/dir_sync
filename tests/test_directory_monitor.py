@@ -5,6 +5,7 @@ from inotify_simple import flags
 
 from dir_sync.directory_monitor import DirectoryMonitor
 
+
 def get_event_and_flags(monitor):
     event = monitor.get_events()[0]
     return event, monitor.get_flags(event)
@@ -88,4 +89,5 @@ class DirectoryMonitorTest(TestCase):
         for flag in flags_:
             self.assertIn(flag, [flags.DELETE, flags.ISDIR])
         self.assertEqual(events[4].directory.name, 'tmp')
-        self.assertEqual(events[4].directory.path, os.path.abspath(self.path_name))
+        self.assertEqual(events[4].directory.path,
+                         os.path.abspath(self.path_name))
