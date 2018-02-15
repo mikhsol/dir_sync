@@ -21,11 +21,12 @@ class FilesComporator:
 
         matcher = difflib.SequenceMatcher(None, o, t)
         for tag, i1, i2, j1, j2 in reversed(matcher.get_opcodes()):
-            result.append({
-                'tag': tag,
-                'i1': i1, 'i2': i2,
-                'payload': t[j1: j2]
-                })
+            if tag != 'equal':
+                result.append({
+                    'tag': tag,
+                    'i1': i1, 'i2': i2,
+                    'payload': t[j1: j2]
+                    })
 
         return result
 
@@ -48,8 +49,6 @@ class FilesComporator:
                 data[i1:i2] = payload
             elif tag == 'delete':
                 del data[i1:i2]
-            elif tag == 'equal':
-                continue
 
         with open(file, 'wb') as f:
             f.write(data)

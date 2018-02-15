@@ -29,12 +29,12 @@ class FilesComporatorTest(TestCase):
 
         diff = fc.diff(self.file1, self.file2)
         self.assertFalse(fc.is_equal(self.file1, self.file2))
-        self.assertEqual(len(diff), 2)
+        self.assertEqual(len(diff), 1)
 
         os.system('echo world >> ' + self.file2)
         diff = fc.diff(self.file1, self.file2)
         self.assertFalse(fc.is_equal(self.file1, self.file2))
-        self.assertEqual(len(diff), 3)
+        self.assertEqual(len(diff), 2)
 
         fc.patch(self.file1, diff)
         self.assertTrue(fc.is_equal(self.file1, self.file2))
@@ -51,9 +51,8 @@ class FilesComporatorTest(TestCase):
         os.system('echo world >> ' + self.file2)
 
         diff = fc.diff(self.file1, self.file2)
-        print(diff)
         self.assertFalse(fc.is_equal(self.file1, self.file2))
-        self.assertEqual(len(diff), 6)
+        self.assertEqual(len(diff), 3)
 
         fc.patch(self.file1, diff)
         self.assertTrue(fc.is_equal(self.file1, self.file2))
