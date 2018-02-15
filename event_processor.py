@@ -1,8 +1,8 @@
 import os
 from distutils.dir_util import copy_tree
 from inotify_simple import flags
-from dir_sync.directory_monitor import DirectoryMonitor as dm
 from dir_sync.files_comporator import FilesComporator as fc
+
 
 class AbstractSenderStrategy:
 
@@ -14,6 +14,7 @@ class AbstractSenderStrategy:
 
     def send_changes(changes):
         raise NotImplemented
+
 
 class StubSender(AbstractSenderStrategy):
 
@@ -32,7 +33,14 @@ class StubSender(AbstractSenderStrategy):
     def send_changes(changes):
         pass
 
+
 class EventProcessor:
+
+    def process(self, event):
+        raise NotImplementedError
+
+
+class ClientEventProcessor(EventProcessor):
     DS_DIR = '.ds'
 
     def __init__(self, directory=None, sender=None):
@@ -46,18 +54,20 @@ class EventProcessor:
         self.sender = sender
 
     def process(self, event):
-        flags_ = dm.get_flags(event)
+        flags_ = flags.from_mask(event.mask)
         # Generate path to local copy for new object to have chance
         # get changes on object modify event later.
-        ds_path_to_new_object = os.path.join(self.ds_path,
-            event.directory.path[len(self.directory)+1:])
+        ds_path_to_new_object = \
+            os.path.join(self.ds_path,
+                         event.directory.path[len(self.directory)+1:])
 
         if flags.ISDIR in flags_:
             if flags.CREATE in flags_:
                 copy_tree(event.directory.path, ds_path_to_new_object)
                 self.sender.send_directory(event.directory)
             elif flags.DELETE in flags_:
-                path_to_delete = os.path.join(ds_path_to_new_object, event.name)
+                path_to_delete = os.path.join(ds_path_to_new_object,
+                                              event.name)
                 os.system('rm -r {}'.format(path_to_delete))
             else:
                 # TODO: add proper exception
@@ -87,5 +97,3 @@ class EventProcessor:
             else:
                 # TODO: add proper exception
                 raise NotImplemented
-
-

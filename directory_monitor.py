@@ -18,6 +18,7 @@ class Directory:
     def __repr__(self):
         return 'name: {} - path: {}'.format(self.name, self.path)
 
+
 # TODO: maybe a good idea to separate Directory and File events info as
 # ancestor classes of events info.
 class EventInfo:

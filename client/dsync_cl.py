@@ -7,6 +7,7 @@ import time
 from distutils.dir_util import copy_tree
 
 from dir_sync.directory_monitor import DirectoryMonitor
+from dir_sync.event_processor import ClientEventProcessor, SoketSender
 
 OLD_FILES_STORAGE_NAME = '.ds'
 
@@ -56,11 +57,16 @@ def main():
     prepare_directory(directory)
     excluded_dirs = [os.path.join(directory, OLD_FILES_STORAGE_NAME)]
     dm = DirectoryMonitor(directory, excluded_dirs)
+    sender = SocketSender()
+    ep = ClientEventProcessor(directory, sender)
 
     signal.signal(signal.SIGINT, signal_handler)
     interrupted = False
     while True:
         events = dm.get_events()
+
+        for event in events:
+            ep.process(event)
 
         time.sleep(polling_time)
         if interrupted:
