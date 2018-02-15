@@ -8,11 +8,18 @@ class Directory:
         self.wd = None
         self.name = name
         if not path:
-            self.path = os.path.abspath(name)
+            self.path = name
         else:
             self.path = path
 
+    def __str__(self):
+        return 'name: {} - path: {}'.format(self.name, self.path)
 
+    def __repr__(self):
+        return 'name: {} - path: {}'.format(self.name, self.path)
+
+# TODO: maybe a good idea to separate Directory and File events info as
+# ancestor classes of events info.
 class EventInfo:
 
     def __init__(self, event, directory=None):
@@ -23,18 +30,20 @@ class EventInfo:
         self.directory = directory
 
     def __str__(self):
-        return '[wd: ' + str(self.wd) + '; name: ' + self.name + ']'
+        return 'wd: {} - name: {}'.format(self.wd, self.name)
 
     def __repr__(self):
-        return '[wd: ' + str(self.wd) + '; name: ' + self.name + ']'
+        return 'wd: {} - name: {}'.format(self.wd, self.name)
 
 
 class DirectoryMonitor:
 
-    def __init__(self, root_dir=None):
+    def __init__(self, root_dir=None, excluded_dirs=[]):
         if not root_dir:
+            # TODO: create proper exception class
             raise NotADirectoryError
         self.root_dir = Directory(root_dir)
+        self.excluded_dirs = excluded_dirs
         self.inotify = INotify()
         self.watch_flags = flags.CREATE | flags.MODIFY | flags.DELETE
         self.watched_dirs = {}
@@ -47,7 +56,8 @@ class DirectoryMonitor:
 
     def _init_child_directories(self, directory):
         for file_ in os.listdir(directory.path):
-            if os.path.isdir(file_):
+            p = os.path.join(directory.path, file_)
+            if os.path.isdir(p) and p not in self.excluded_dirs:
                 p = os.path.join(directory.path, file_)
                 d = Directory(file_, p)
                 self.watch(d)
@@ -63,9 +73,10 @@ class DirectoryMonitor:
         return self._prepare_events(self.inotify.read(timeout=100))
 
     def _get_path_from_event(self, event):
-        return os.path.join(self.watched_dirs.get(event.wd).path,
-                            event.name)
-        print(event.directory.path)
+        path = self.watched_dirs.get(event.wd).path
+        if flags.ISDIR in self.get_flags(event):
+            path = os.path.join(path, event.name)
+        return path
 
     def _prepare_events(self, events):
         results = []
