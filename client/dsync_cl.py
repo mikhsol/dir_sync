@@ -54,7 +54,8 @@ def main():
 
     logger.info('dsync_cl starts...')
     prepare_directory(directory)
-    dm = DirectoryMonitor(directory)
+    excluded_dirs = [os.path.join(directory, OLD_FILES_STORAGE_NAME)]
+    dm = DirectoryMonitor(directory, excluded_dirs)
 
     signal.signal(signal.SIGINT, signal_handler)
     interrupted = False
