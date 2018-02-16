@@ -1,7 +1,7 @@
 from unittest import TestCase
 import os
 
-from dir_sync.client.dsync_cl import prepare_directory
+from dsync_cl import prepare_directory
 
 
 class PrepareDirectoryFunctionTest(TestCase):

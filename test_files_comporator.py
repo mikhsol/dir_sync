@@ -1,6 +1,6 @@
 import os
 from unittest import TestCase
-from dir_sync.files_comporator import FilesComporator as fc
+from files_comporator import FilesComporator as fc
 
 
 class FilesComporatorTest(TestCase):

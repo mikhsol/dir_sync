@@ -6,15 +6,12 @@ import logging
 import time
 from distutils.dir_util import copy_tree
 
-from dir_sync.directory_monitor import DirectoryMonitor
-from dir_sync.event_processor import ClientEventProcessor, SoketSender
+from directory_monitor import DirectoryMonitor
+from event_processor import ClientEventProcessor
+from sender import SocketSender
+from utils import create_logger
 
 OLD_FILES_STORAGE_NAME = '.ds'
-
-
-def signal_handler(signal, frame):
-    global interrupted
-    interrupted = True
 
 
 def prepare_directory(directory):
@@ -30,8 +27,7 @@ def prepare_directory(directory):
 
 
 def main():
-    logger = logging.basicConfig(level=logging.INFO)
-
+    logger = create_logger('client')
     parser = argparse.ArgumentParser(
         description="dsyc-cl - client side application which can track the " +
                     "state of the directory and transfer changes to remote " +
@@ -40,16 +36,16 @@ def main():
     parser.add_argument('-d',
                         help="path to directory which should be syncronised",
                         type=str)
-    parser.add_argument('-h',
+    parser.add_argument('-H', default='localhost',
                         help="host to send changes on directory")
-    parser.add_argument('-p',
+    parser.add_argument('-p', default=6666,
                         help="port number")
     parser.add_argument('--polling_time', default=1,
                         help='time to retreive info about events in directory')
     args = parser.parse_args()
 
     directory = args.d
-    host = args.h
+    host = args.H
     port = args.p
     polling_time = args.polling_time
 
@@ -57,11 +53,10 @@ def main():
     prepare_directory(directory)
     excluded_dirs = [os.path.join(directory, OLD_FILES_STORAGE_NAME)]
     dm = DirectoryMonitor(directory, excluded_dirs)
-    sender = SocketSender()
+    sender = SocketSender(host, port)
+    sender.init(directory)
     ep = ClientEventProcessor(directory, sender)
 
-    signal.signal(signal.SIGINT, signal_handler)
-    interrupted = False
     while True:
         events = dm.get_events()
 
@@ -69,9 +64,6 @@ def main():
             ep.process(event)
 
         time.sleep(polling_time)
-        if interrupted:
-            logger.info('dsync_cl finished...')
-            break
 
 
 if __name__ == "__main__":

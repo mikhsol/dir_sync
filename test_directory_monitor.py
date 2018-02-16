@@ -3,7 +3,7 @@ import os
 
 from inotify_simple import flags
 
-from dir_sync.directory_monitor import DirectoryMonitor
+from directory_monitor import DirectoryMonitor
 
 
 def get_event_and_flags(monitor):

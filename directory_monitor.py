@@ -19,22 +19,23 @@ class Directory:
         return 'name: {} - path: {}'.format(self.name, self.path)
 
 
-# TODO: maybe a good idea to separate Directory and File events info as
-# ancestor classes of events info.
 class EventInfo:
 
-    def __init__(self, event, directory=None):
+    def __init__(self, event, directory=None, diff=None):
         self.wd = event.wd
         self.mask = event.mask
         self.cookie = event.cookie
         self.name = event.name
         self.directory = directory
+        self.diff = diff
 
     def __str__(self):
-        return 'wd: {} - name: {}'.format(self.wd, self.name)
+        return 'wd: {} - name: {} - type: {}' \
+                .format(self.wd, self.name, flags.from_mask(self.mask))
 
     def __repr__(self):
-        return 'wd: {} - name: {}'.format(self.wd, self.name)
+        return 'wd: {} - name: {} - type: {}' \
+                .format(self.wd, self.name, flags.from_mask(self.mask))
 
 
 class DirectoryMonitor:
