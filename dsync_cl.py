@@ -13,6 +13,8 @@ from utils import create_logger
 
 OLD_FILES_STORAGE_NAME = '.ds'
 
+logger = create_logger('client')
+
 
 def prepare_directory(directory):
     '''Prepare directory to be tracked. Check if directory exists, if not
@@ -23,11 +25,12 @@ def prepare_directory(directory):
     if not os.path.exists(directory) or not os.path.isdir(directory):
         os.mkdir(directory)
     old_files_storage = os.path.join(directory, OLD_FILES_STORAGE_NAME)
+    if os.path.exists(old_files_storage):
+        os.system('rm -r {}'.format(old_files_storage))
     copy_tree(directory, old_files_storage)
 
 
 def main():
-    logger = create_logger('client')
     parser = argparse.ArgumentParser(
         description="dsyc-cl - client side application which can track the " +
                     "state of the directory and transfer changes to remote " +
@@ -35,7 +38,7 @@ def main():
     )
     parser.add_argument('-d',
                         help="path to directory which should be syncronised",
-                        type=str)
+                        type=str, required=True)
     parser.add_argument('-H', default='localhost',
                         help="host to send changes on directory")
     parser.add_argument('-p', default=6666,
@@ -53,7 +56,7 @@ def main():
     prepare_directory(directory)
     excluded_dirs = [os.path.join(directory, OLD_FILES_STORAGE_NAME)]
     dm = DirectoryMonitor(directory, excluded_dirs)
-    sender = SocketSender(host, port)
+    sender = SocketSender(host, port, excluded_dirs)
     sender.init(directory)
     ep = ClientEventProcessor(directory, sender)
 
@@ -67,4 +70,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger.info('dsync_cl stops...')

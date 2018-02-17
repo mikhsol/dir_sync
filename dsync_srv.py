@@ -6,9 +6,10 @@ import argparse
 from receiver import SocketReceiver
 from utils import create_logger
 
+logger = create_logger('server')
+
 
 def main():
-    logger = create_logger('server')
     parser = argparse.ArgumentParser(
         description="dsyc-srv - server application which can track the " +
                     "state of the remote directory and apply changes " +
@@ -30,8 +31,9 @@ def main():
     while True:
         receiver.handle()
 
-        logger.info('dsync_srv finishes...')
-
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger.info('dsync_srv stops...')
