@@ -83,14 +83,19 @@ class DirectoryMonitor:
     def _prepare_events(self, events):
         results = []
         for event in events:
-            event = EventInfo(event)
             flags_ = self.get_flags(event)
+            # Skip events on hidden tmp files which used by different editors
+            # to store intermediate results.
+            if flags.IGNORED in flags_ or \
+                    (len(event.name) > 0 and event.name[0] == '.'):
+                continue
+            event = EventInfo(event)
             event.directory = Directory(event.name,
                                         self._get_path_from_event(event))
             if flags.CREATE in flags_ and flags.ISDIR in flags_:
-                    self.watch(event.directory)
+                self.watch(event.directory)
             elif flags.DELETE in flags_ and flags.ISDIR in flags_:
-                    event.directory = self._stop_watch(event)
+                event.directory = self._stop_watch(event)
             results.append(event)
         return results
 
