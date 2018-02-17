@@ -1,5 +1,6 @@
 import logging
 
+
 def create_logger(name=__name__):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
@@ -7,12 +8,14 @@ def create_logger(name=__name__):
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     # create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s' +
+                                  ' - %(message)s')
     # add formatter to ch
     ch.setFormatter(formatter)
     # add ch to logger
     logger.addHandler(ch)
     return logger
+
 
 class SocketEvents:
     FILE = b'FILE'
@@ -20,5 +23,5 @@ class SocketEvents:
     EVENT = b'EVENT'
     READY = b'READY'
     OK = b'OK'
-    INIT = b'OK'
-    # FINISH = b'FINISH'
+    INIT = b'INIT'
+    FINISHED = b'FINISHED'
