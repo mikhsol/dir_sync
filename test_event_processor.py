@@ -152,7 +152,7 @@ class ClientDirectoryEventProcessorTest(ClientEventProcessorTest):
         os.system('rm -r tmp/hello')
 
         events = self.m.get_events()
-        self.assertEqual(len(events), 3)
+        self.assertEqual(len(events), 2)
 
         for event in events:
             self.ep.process(event)
@@ -167,7 +167,7 @@ class ServerEventProcessorTest(EventProcessorTest):
 
     def setUp(self):
         super().setUp()
-        self.ep = ServerEventProcessor('tmp')
+        self.ep = ServerEventProcessor('tracking_dirs/tmp')
         self.cep = ClientEventProcessor('tmp', StubSender())
 
     def tearDown(self):
@@ -185,10 +185,10 @@ class ServerEventProcessorTest(EventProcessorTest):
 class ServerFileEventProcessorTest(ServerEventProcessorTest):
 
     def test_on_server_event_processor_init(self):
-        self.ep = ServerEventProcessor('tmp_srv')
-        self.assertTrue(os.path.exists('tmp_srv'))
-        self.assertTrue(os.path.isdir('tmp_srv'))
-        os.system('rm -r tmp_srv')
+        self.ep = ServerEventProcessor('tracking_dirs/tmp_srv')
+        self.assertTrue(os.path.exists('tracking_dirs/tmp_srv'))
+        self.assertTrue(os.path.isdir('tracking_dirs/tmp_srv'))
+        os.system('rm -r tracking_dirs/tmp_srv')
 
     def test_on_modify(self):
         os.system('echo hello > tmp/hello.txt')
@@ -196,13 +196,14 @@ class ServerFileEventProcessorTest(ServerEventProcessorTest):
         self.assertEqual(len(events), 2)
 
         os.system('mv tmp/hello.txt tmp/hello_check.txt')
-        os.system('touch tmp/hello.txt')
+        os.system('touch tmp/hello.txt tracking_dirs/tmp/hello.txt')
         diff = fc.diff('tmp/hello.txt', 'tmp/.ds/hello.txt')
         event = events[1]
         event.diff = diff
         self.ep.process(event)
 
-        self.assertTrue(fc.is_equal('tmp/hello.txt', 'tmp/hello_check.txt'))
+        self.assertTrue(fc.is_equal('tracking_dirs/tmp/hello.txt',
+                                    'tmp/hello_check.txt'))
 
     def test_on_delete(self):
         os.system('echo hello > tmp/hello.txt')
@@ -213,10 +214,10 @@ class ServerFileEventProcessorTest(ServerEventProcessorTest):
         events = self.process_dummy_events()
         self.assertEqual(len(events), 1)
 
-        os.system('echo hello > tmp/hello.txt')
+        os.system('echo > tracking_dirs/tmp/hello.txt')
         self.ep.process(events[0])
 
-        self.assertFalse(os.path.exists('tmp/hello.txt'))
+        self.assertFalse(os.path.exists('tracking_dirs/tmp/hello.txt'))
 
 
 class ServerDirectoryEventProcessorTest(ServerEventProcessorTest):
@@ -228,9 +229,9 @@ class ServerDirectoryEventProcessorTest(ServerEventProcessorTest):
 
         os.system('rm -r tmp/hello')
         events = self.process_dummy_events()
-        self.assertEqual(len(events), 2)
+        self.assertEqual(len(events), 1)
 
-        os.mkdir('tmp/hello')
-        self.ep.process(events[1])
+        os.mkdir('tracking_dirs/tmp/hello')
+        self.ep.process(events[0])
 
-        self.assertFalse(os.path.exists('tmp/hello'))
+        self.assertFalse(os.path.exists('tracking_dirs/tmp/hello'))

@@ -69,7 +69,7 @@ class DirectoryMonitorTest(TestCase):
         os.system('rm -r tmp/foo/')
 
         events = self.m.get_events()
-        self.assertEqual(len(events), 5)
+        self.assertEqual(len(events), 4)
 
         flag = self.m.get_flags(events[0])
         self.assertEqual(events[0].name, 'test.txt')
@@ -79,14 +79,9 @@ class DirectoryMonitorTest(TestCase):
         self.assertEqual(events[1].name, 'test.txt')
         self.assertEqual(flag[0], flags.MODIFY)
 
-        # IGNORED FLAG raised cause directory was removed
-        flag = self.m.get_flags(events[3])
-        self.assertEqual(events[3].name, '')
-        self.assertEqual(flag[0], flags.IGNORED)
-
-        flags_ = self.m.get_flags(events[4])
-        self.assertEqual(events[4].name, 'foo')
+        flags_ = self.m.get_flags(events[3])
+        self.assertEqual(events[3].name, 'foo')
         for flag in flags_:
             self.assertIn(flag, [flags.DELETE, flags.ISDIR])
-        self.assertEqual(events[4].directory.name, 'tmp')
-        self.assertEqual(events[4].directory.path, self.path_name)
+        self.assertEqual(events[3].directory.name, 'tmp')
+        self.assertEqual(events[3].directory.path, self.path_name)
