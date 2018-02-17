@@ -31,14 +31,14 @@ class FilesComporator:
         return result
 
     @staticmethod
-    def patch(file, diff):
+    def patch(file_, diff):
         '''Patch file with provided diff rules given by difflib.SequenceMatcher
            opcodes (rules how to turn one object into another)
         '''
         if len(diff) == 0:
             return
         data = []
-        with open(file, 'rb') as f:
+        with open(file_, 'rb') as f:
             data = bytearray(f.read())
 
         for d in diff:
@@ -50,5 +50,5 @@ class FilesComporator:
             elif tag == 'delete':
                 del data[i1:i2]
 
-        with open(file, 'wb') as f:
+        with open(file_, 'wb') as f:
             f.write(data)
