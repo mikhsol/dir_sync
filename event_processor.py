@@ -29,7 +29,6 @@ class ClientEventProcessor(EventProcessor):
         self.sender = sender
 
     def process(self, event):
-        logger_cl.debug("EP: {}".format(event))
         flags_ = flags.from_mask(event.mask)
         # Generate path to local copy for new object to have chance
         # get changes on object modify event later.
