@@ -8,6 +8,22 @@ from utils import SocketEvents as se
 logger = logging.getLogger('client')
 
 
+class DataTransferError(Exception):
+    pass
+
+
+class NoSuchFileError(Exception):
+    pass
+
+
+class NoSuchDirectoryError(Exception):
+    pass
+
+
+class NotAFileException(Exception):
+    pass
+
+
 class AbstractSenderStrategy:
 
     def send_file(self, file_path, file_name):
@@ -51,8 +67,9 @@ class SocketSender(AbstractSenderStrategy):
                 if status == se.OK:
                     logger.info('Root directory name was sent...')
                 else:
-                    # TODO: rise DataTransferError
-                    pass
+                    logger.error('Unexpected staus "{}" was returned.'
+                                 .format(status))
+                    raise DataTransferError
 
         self.send_directory(directory)
         logger.info('Init success...')
@@ -61,10 +78,10 @@ class SocketSender(AbstractSenderStrategy):
         file_ = os.path.join(file_path, file_name)
         if not os.path.exists(file_):
             logger.error('No such file "{}"'.format(file_))
-            # TODO: raise NoSuchFileException
+            raise NoSuchFileError
         if not os.path.isfile(file_):
             logger.error('Not a file "{}"'.format(file_))
-            # TODO: raise NotAFileException
+            raise NotAFileException
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((self.host, self.port))
@@ -89,8 +106,9 @@ class SocketSender(AbstractSenderStrategy):
                 if status == se.OK:
                     logger.info('File "{}" was delivered.'.format(file_name))
                 else:
-                    # TODO: rise FileTransferError
-                    pass
+                    logger.error('File "{}" was not delivered.'
+                                 .format(file_name))
+                    raise DataTransferError
             else:
                 logger.error('Does not support such server response "{}"'
                              .format(str(status).decode('utf-8')))
@@ -104,7 +122,7 @@ class SocketSender(AbstractSenderStrategy):
             if status == se.READY:
                 if not os.path.exists(path):
                     logger.error('No such directory "{}"'.format(path))
-                    # TODO: raise NoSuchDirectoryException
+                    raise NoSuchDirectoryError
                 if not os.path.isdir(path):
                     logger.error('Not a directory "{}"'.format(path))
                     raise NotADirectoryError
@@ -114,8 +132,9 @@ class SocketSender(AbstractSenderStrategy):
                 if status == se.OK:
                     logger.info('Directory was created on remote host...')
                 else:
-                    # TODO: rise DataTransferError
-                    pass
+                    logger.error('Unexpected staus "{}" was returned.'
+                                 .format(status))
+                    raise DataTransferError
             else:
                 logger.error('Does not support such server response "{}"'
                              .format(str(status)))
@@ -150,8 +169,9 @@ class SocketSender(AbstractSenderStrategy):
                 if status == se.OK:
                     logger.info('Event was sent to remote host...')
                 else:
-                    # TODO: rise DataTransferError
-                    pass
+                    logger.error('Unexpected staus "{}" was returned.'
+                                 .format(status))
+                    raise DataTransferError
             else:
                 logger.error('Does not support such server response "{}"'
                              .format(str(status)))

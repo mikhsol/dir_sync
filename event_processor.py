@@ -75,7 +75,7 @@ class ServerEventProcessor(EventProcessor):
 
     def __init__(self, directory=None):
         if not directory:
-            logger_srv.info('No directory was provided into constructor')
+            logger_srv.error('No directory was provided into constructor')
             raise NotADirectoryError
         self.directory = directory
         if not os.path.exists(self.directory):
@@ -91,20 +91,19 @@ class ServerEventProcessor(EventProcessor):
                     os.system('rm -r {}'.format(path))
             else:
                 # TODO: add proper exception
-                logger_srv.info('Do not support "{}" type of operations '
+                logger_srv.error('Do not support "{}" type of operations '
                                 .format(flags_))
                 raise NotImplementedError
         else:
             path = os.path.join(self.TRACKING_DIRS, event.directory.path,
                                 event.name)
             if flags.MODIFY in flags_:
-                logger_srv.info(event.diff)
                 fc.patch(path, event.diff)
             elif flags.DELETE in flags_:
                 if os.path.exists(path):
                     os.system('rm {}'.format(path))
             else:
                 # TODO: add proper exception
-                logger_srv.info('Do not support "{}" type of operations '
+                logger_srv.error('Do not support "{}" type of operations '
                                 .format(flags_))
                 raise NotImplementedError

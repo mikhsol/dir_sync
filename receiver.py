@@ -77,8 +77,8 @@ class SocketReceiver:
                 logger.info('Evetnt {} was deliverd ...'.format(event))
                 self.ep.process(event)
             else:
-                # TODO: NoSuchEventException
-                pass
+                logger.error()
+                raise NotImplementedError
 
             conn.send(se.OK)
         finally:
