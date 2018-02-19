@@ -172,6 +172,7 @@ class ServerEventProcessorTest(EventProcessorTest):
 
     def tearDown(self):
         super().tearDown()
+        os.system('rm -r tracking_dirs')
 
     def process_dummy_events(self):
         events = self.m.get_events()

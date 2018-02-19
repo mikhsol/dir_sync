@@ -83,5 +83,6 @@ class DirectoryMonitorTest(TestCase):
         self.assertEqual(events[3].name, 'foo')
         for flag in flags_:
             self.assertIn(flag, [flags.DELETE, flags.ISDIR])
-        self.assertEqual(events[3].directory.name, 'tmp')
-        self.assertEqual(events[3].directory.path, self.path_name)
+        print(events)
+        self.assertEqual(events[3].directory.name, 'foo')
+        self.assertEqual(events[3].directory.path, 'tmp/foo')
