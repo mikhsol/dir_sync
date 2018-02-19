@@ -1,6 +1,5 @@
 import sys
 import os
-import signal
 import argparse
 
 from receiver import SocketReceiver
