@@ -49,12 +49,14 @@ class DirectoryMonitor:
         self.inotify = INotify()
         self.watch_flags = flags.CREATE | flags.MODIFY | flags.DELETE
         self.watched_dirs = {}
+        self.wd_tracker = {}
         self.watch(self.root_dir)
 
     def watch(self, directory):
         self._init_child_directories(directory)
         directory.wd = self.inotify.add_watch(directory.path, self.watch_flags)
         self.watched_dirs[directory.wd] = directory
+        self.wd_tracker[directory.path] = directory.wd
 
     def _init_child_directories(self, directory):
         for file_ in os.listdir(directory.path):
@@ -63,10 +65,6 @@ class DirectoryMonitor:
                 p = os.path.join(directory.path, file_)
                 d = Directory(file_, p)
                 self.watch(d)
-
-    def _stop_watch(self, event):
-        self.inotify.rm_watch(event.wd)
-        return self.watched_dirs.pop(event.wd)
 
     def close(self):
         self.inotify.close()
@@ -95,7 +93,8 @@ class DirectoryMonitor:
             if flags.CREATE in flags_ and flags.ISDIR in flags_:
                 self.watch(event.directory)
             elif flags.DELETE in flags_ and flags.ISDIR in flags_:
-                event.directory = self._stop_watch(event)
+                wd = self.wd_tracker.pop(event.directory.path)
+                self.watched_dirs.pop(wd)
             results.append(event)
         return results
 
